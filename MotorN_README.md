@@ -74,9 +74,36 @@ mean = convolve2d(campo, kernel, mode="same")
 varianza = convolve2d((campo - mean)**2, kernel)
 ```
 
+
 ---
 
-## ✨ Aplicaciones
+## 🖥️ Interfaz gráfica Tkinter
+
+El proyecto incluye una interfaz visual interactiva basada en Tkinter (`motor_interfaz_n.py`) que permite:
+
+- **Visualización en tiempo real** del campo informacional.
+- **Evolucionar** el campo paso a paso (`Evolucionar`) o de forma continua (`Iniciar animación` / `Pausar animación`).
+- **Reiniciar** el campo a un estado aleatorio (`Reiniciar`).
+- **Inyectar información** en cualquier punto con un clic o "pintar" manteniendo pulsado el botón izquierdo del ratón sobre el canvas.
+- **Controlar la velocidad** de la animación con un slider (milisegundos entre pasos).
+- **Guardar campo**: almacena el estado actual del campo en la carpeta `datos_campo` como archivo `.npy`.
+- **Cargar campo**: recupera un estado guardado previamente desde la carpeta `datos_campo`.
+- **Visualización de la entropía global** en tiempo real.
+
+### Controles disponibles
+
+| Botón/Control           | Función                                                                 |
+|-------------------------|------------------------------------------------------------------------|
+| Evolucionar             | Avanza el campo un paso temporal                                        |
+| Reiniciar               | Reinicia el campo a un estado aleatorio                                 |
+| Iniciar/Pausar animación| Comienza o detiene la evolución automática del campo                    |
+| Guardar campo           | Guarda el estado actual como `.npy` en `datos_campo`                    |
+| Cargar campo            | Carga un archivo `.npy` guardado (si coincide la dimensión del campo)   |
+| Slider velocidad        | Controla el tiempo entre pasos de animación (ms)                        |
+| Canvas                  | Inyecta información con clic o "pinta" manteniendo pulsado el botón     |
+| Entropía                | Muestra el valor medio de la entropía global del campo                  |
+
+---
 
 - Simulación de perturbaciones informacionales (ondas, impulsos).
 - Medición de entropía en sistemas complejos.
