@@ -1,9 +1,9 @@
-
 # MotorN – Simulador del Campo Informacional DIG
 
-Este módulo implementa un motor dinámico en Python para simular la evolución de un campo informacional según los principios de la **Teoría DIG (Dualidad Información-Gravedad)**. Cada punto del campo representa un valor de densidad informacional ρ(x,y) que evoluciona en el tiempo mediante ecuaciones derivadas de la teoría.
+Este módulo implementa un motor dinámico en Python para simular la evolución de un campo informacional según los principios de la **Teoría DIG (Dualidad Información-Gravedad)**. Incluye dos implementaciones:
 
----
+1. **`MotorN`**: Implementación básica con difusión y entropía.
+2. **`MotorNDIGExtendido`**: Versión extendida con memoria persistente y efectos DIG mejorados.
 
 ## 📦 Clase: `MotorN`
 
@@ -18,36 +18,88 @@ MotorN(dim=50, gamma=0.05, lambda_=0.02)
 
 ---
 
+## 📦 Clase: `MotorNDIGExtendido`
+
+```python
+MotorNDIGExtendido(dim=100, gamma=0.1, lambda_=0.05, mu=0.1, kappa=0.3)
+```
+
+### Características adicionales:
+- **Memoria persistente** que conserva información entre reinicios
+- **Efectos DIG mejorados** con parámetros ajustables
+- **Panel de control** para ajuste en tiempo real de parámetros
+
+### Parámetros adicionales:
+- `mu`: Tasa de actualización de la memoria (0-1)
+- `kappa`: Fuerza del feedback de la memoria (0-1)
+
+## 🎛️ Panel de Control
+
+La interfaz gráfica incluye un panel de control con pestañas:
+
+1. **Controles principales**:
+   - Activar/desactivar motor extendido
+   - Reiniciar campo (con o sin memoria)
+   - Control de animación
+   - Guardar/cargar configuraciones
+
+2. **Parámetros**:
+   - Deslizadores para ajustar en tiempo real:
+     - Difusión (γ)
+     - Entropía (λ)
+     - Memoria (μ)
+     - Feedback (κ)
+     - Tamaño de la rejilla
+
 ## 🔧 Métodos disponibles
 
 ### `evolucionar()`
 Avanza el campo ρ un paso en el tiempo según la ecuación:
 
 \[
-ho_{t+1} = ho_t + \gamma 
-abla^2 ho - \lambda \partial S
+\rho_{t+1} = \rho_t + \gamma 
+\nabla^2 
+\rho - \lambda \partial S + \kappa (\rho_{mem} - \rho)
 \]
 
 - La difusión se calcula con un **Laplaciano discreto**.
-- La reorganización por entropía local se modela como la desviación estándar local (entropía sigma).
+- La reorganización por entropía local se modela como la desviación estándar local.
+- El término de feedback de memoria solo está presente en `MotorNDIGExtendido`.
 
 ---
 
 ### `inyectar(x, y, intensidad=1.0)`
 Permite **alterar un punto** del campo en las coordenadas (x, y) añadiendo información.
 
-- Útil para simular perturbaciones, ondas u observaciones informacionales.
+- Las coordenadas se mapean automáticamente a la rejilla actual.
 - La inyección se mantiene acotada entre 0 y 1.
+- Compatible con interacción del ratón.
 
 ---
 
-### `reiniciar()`
-Reinicia el campo a un estado aleatorio inicial con valores bajos de información (entorno no excitado).
+### `reiniciar(reiniciar_memoria=False)`
+Reinicia el campo a un estado aleatorio inicial.
+
+- En `MotorNDIGExtendido`, puede preservar la memoria si `reiniciar_memoria=False`.
 
 ---
 
 ### `obtener_rho()`
 Devuelve la **matriz ρ** actual (numpy array de shape (dim, dim)).
+
+## 🐛 Correcciones recientes
+
+1. **Alineación del puntero**:
+   - Corregido el mapeo de coordenadas entre el canvas y la rejilla del motor.
+   - Ahora el dibujo aparece exactamente donde se hace clic.
+
+2. **Conversión de dimensiones**:
+   - Asegurado que el parámetro `dim` siempre sea entero.
+   - Prevención de errores al cambiar el tamaño de la rejilla.
+
+3. **Persistencia de memoria**:
+   - La memoria ahora persiste incluso cuando se reinicia el campo visual.
+   - Mejor control sobre la interacción entre memoria y campo actual.
 
 ---
 
