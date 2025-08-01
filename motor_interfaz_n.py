@@ -14,6 +14,9 @@ matplotlib.use('TkAgg', force=True)
 import numpy as np
 from PIL import Image, ImageTk
 
+# Import DIG simulator
+from dig_simulator import simular_universo_dig, exportar_campo_tiempo
+
 # Import matplotlib components after setting the backend
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -145,6 +148,11 @@ class MotorNApp:
         
         ttk.Button(self.control_frame, text="Evolucionar", command=self.evolucionar).pack(fill=tk.X, pady=2)
         ttk.Button(self.control_frame, text="Reiniciar", command=self.reiniciar).pack(fill=tk.X, pady=2)
+        
+        # Botón para ejecutar simulación DIG
+        ttk.Separator(self.control_frame, orient='horizontal').pack(fill=tk.X, pady=5)
+        ttk.Label(self.control_frame, text="Simulador DIG:").pack(fill=tk.X, pady=2)
+        ttk.Button(self.control_frame, text="Ejecutar Simulación DIG", command=self.ejecutar_simulacion_dig).pack(fill=tk.X, pady=2)
         ttk.Label(self.control_frame, text="Entropía:").pack(fill=tk.X, pady=2)
         self.entropia_label = ttk.Label(self.control_frame, text="0.000")
         self.entropia_label.pack(fill=tk.X, pady=2)
@@ -262,6 +270,65 @@ class MotorNApp:
             self.btn_reiniciar_campo.pack_forget()  # Ocultar botón de reinicio de campo
             self.log_mensaje("Motor normal activado")
     
+    def ejecutar_simulacion_dig(self):
+        """Ejecuta la simulación DIG y la carga como estado inicial del motor"""
+        try:
+            self.log_mensaje("Iniciando simulación DIG...")
+            
+            # Usar la dimensión actual del motor para la simulación
+            resolucion = self.motor.dim if hasattr(self.motor, 'dim') else 100
+            
+            # Ejecutar la simulación con parámetros por defecto
+            campo_tiempo = simular_universo_dig(
+                resolucion=resolucion,
+                rho_c=1.0,
+                Rs=min(20.0, resolucion/5),  # Ajustar Rs según la resolución
+                k_c2=1.0,
+                delta_q=0.1
+            )
+            
+            # Normalizar el campo de tiempo al rango [0,1]
+            campo_tiempo = (campo_tiempo - np.min(campo_tiempo)) / (np.max(campo_tiempo) - np.min(campo_tiempo) + 1e-8)
+            
+            # Cargar el resultado en el motor principal
+            if hasattr(self.motor, 'rho'):
+                # Si el motor ya está inicializado, actualizar su estado
+                if campo_tiempo.shape == self.motor.rho.shape:
+                    self.motor.rho = campo_tiempo
+                    self.motor.tiempo = 0  # Reiniciar el contador de tiempo
+                    self.actualizar_vista()
+                    self.log_mensaje("Simulación DIG cargada. Usa 'Evolucionar' para ver la dinámica.")
+                else:
+                    # Si las dimensiones no coinciden, reiniciar el motor
+                    self.log_mensaje("Reiniciando motor con nueva simulación...")
+                    self.motor = type(self.motor)(dim=resolucion)
+                    self.motor.rho = campo_tiempo
+                    self.actualizar_vista()
+                    self.log_mensaje("Nueva simulación DIG cargada. Usa 'Evolucionar'.")
+            
+        except Exception as e:
+            self.log_mensaje(f"Error en la simulación DIG: {str(e)}")
+    
+    def mostrar_imagen_dig(self, ruta_imagen):
+        """Muestra la imagen generada por la simulación DIG en el canvas"""
+        try:
+            # Cargar la imagen
+            imagen = Image.open(ruta_imagen)
+            
+            # Redimensionar manteniendo la relación de aspecto
+            ancho, alto = imagen.size
+            nuevo_alto = int(self.canvas_size * (alto / ancho))
+            imagen = imagen.resize((self.canvas_size, nuevo_alto), Image.Resampling.LANCZOS)
+            
+            # Mostrar en el canvas
+            self.tk_image = ImageTk.PhotoImage(imagen)
+            self.canvas.delete("all")  # Limpiar canvas
+            self.canvas.config(width=self.canvas_size, height=nuevo_alto)
+            self.canvas.create_image(0, 0, anchor=tk.NW, image=self.tk_image)
+            
+        except Exception as e:
+            self.log_mensaje(f"Error al mostrar la imagen: {str(e)}")
+    
     def log_mensaje(self, msg):
         self.text_area.config(state='normal')
         self.text_area.insert(tk.END, msg + '\n')
@@ -314,9 +381,14 @@ class MotorNApp:
         # Convertir coordenadas del canvas a la rejilla del motor
         x = max(0, min(int(event.x * self.motor.dim / self.canvas_size), self.motor.dim - 1))
         y = max(0, min(int(event.y * self.motor.dim / self.canvas_size), self.motor.dim - 1))
-        self.motor.inyectar(x, y, intensidad=1.0)
-        self.actualizar_vista()
-        self.log_mensaje(f"Pintado en ({x}, {y})")
+        
+        # Asegurarse de que las coordenadas estén dentro de los límites
+        if 0 <= x < self.motor.dim and 0 <= y < self.motor.dim:
+            self.motor.inyectar(x, y, intensidad=1.0)
+            self.actualizar_vista()
+            self.log_mensaje(f"Pintado en ({x}, {y})")
+        else:
+            self.log_mensaje(f"Fuera de límites: ({x}, {y})")
         
     def toggle_animacion(self):
         self.animando = not self.animando

@@ -81,11 +81,17 @@ class MotorNDIGExtendido:
             x, y: Coordenadas donde inyectar
             intensidad: Cantidad a inyectar (ahora afecta tanto al campo como a la memoria)
         """
-        if 0 <= x < self.dim and 0 <= y < self.dim:
-            # Inyectamos en el campo actual
-            self.rho[y, x] = min(1.0, self.rho[y, x] + intensidad)
-            # También actualizamos la memoria para reforzar el patrón
-            self.rho_mem[y, x] = min(1.0, self.rho_mem[y, x] + intensidad * 0.5)
+        try:
+            if np.all((x >= 0) & (x < self.dim) & (y >= 0) & (y < self.dim)):
+                # Inyectamos en el campo actual
+                self.rho[y, x] = np.minimum(1.0, self.rho[y, x] + intensidad)
+                # También actualizamos la memoria para reforzar el patrón
+                self.rho_mem[y, x] = np.minimum(1.0, self.rho_mem[y, x] + intensidad * 0.5)
+        except (ValueError, TypeError):
+            # Fallback para cuando x o y no son arrays (el caso original)
+            if 0 <= x < self.dim and 0 <= y < self.dim:
+                self.rho[y, x] = min(1.0, self.rho[y, x] + intensidad)
+                self.rho_mem[y, x] = min(1.0, self.rho_mem[y, x] + intensidad * 0.5)
 
     def obtener_rho(self):
         return self.rho
