@@ -54,7 +54,7 @@ class VisualizadorCampo:
         densidad = self.campo.densidad_promedio()
         curvatura = self.campo.curvatura_promedio()
         self.canvas.create_text(
-            250, 510, fill="white", font=("Helvetica", 10),
+            250, 505, fill="white", font=("Helvetica", 10),
             text=f"Vivos: {resumen['vivo']}  |  Colapsados: {resumen['colapsado']}  |  Densidad promedio: {densidad:.2f}  |  Curvatura promedio: {curvatura:.2f}"
         )
 

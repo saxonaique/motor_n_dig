@@ -1,10 +1,14 @@
 import math
+import json
+import os
+from datetime import datetime
 
 class CampoInformacional:
     def __init__(self, config):
         self.config = config
         self.nodos = []
         self.colapsos = 0
+        self.log_colapsos = [] # Nueva lista para almacenar los colapsos
 
     def agregar_nodo(self, nodo):
         self.nodos.append(nodo)
@@ -38,5 +42,27 @@ class CampoInformacional:
             return 0
         return sum(abs(n["kappa"]) for n in vivos) / len(vivos)
 
-    def registrar_colapso(self):
+    def registrar_colapso(self, nodo, ciclo):
         self.colapsos += 1
+        # Guardar una copia del nodo y el ciclo en el log
+        self.log_colapsos.append({
+            "ciclo": ciclo,
+            "nodo_id": nodo["id"],
+            "x": nodo["x"],
+            "y": nodo["y"],
+            "rho": nodo["rho"],
+            "kappa": nodo["kappa"],
+            "edad": nodo["edad"]
+        })
+
+    def guardar_log_colapsos(self):
+        # Crear un nombre de archivo único con la fecha y hora
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # Asegurarse de que el directorio 'logs' exista
+        log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "logs")
+        os.makedirs(log_dir, exist_ok=True)
+        file_path = os.path.join(log_dir, f"colapsos_{timestamp}.json")
+        
+        with open(file_path, "w") as f:
+            json.dump(self.log_colapsos, f, indent=4)
+        print(f"Log de colapsos guardado en: {file_path}")

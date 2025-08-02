@@ -19,11 +19,16 @@ def ciclo_motor(campo, visual, config):
     """Función principal del ciclo del motor."""
     global ciclo # Declaramos ciclo como global
     for nodo in campo.nodos:
-        actualizar_nodo(nodo, campo, config)
+        actualizar_nodo(nodo, campo, config, ciclo) # Pasamos el ciclo
     aplicar_reglas(campo, config)
     visual.root.after(config.get("ciclo_delay_ms", 300), lambda: ciclo_motor(campo, visual, config))
     
     ciclo += 1
+
+def on_closing(campo, root):
+    """Función que se ejecuta al cerrar la ventana."""
+    campo.guardar_log_colapsos()
+    root.destroy()
 
 def main():
     """Función principal para configurar y ejecutar la simulación."""
@@ -35,6 +40,9 @@ def main():
 
     visual = VisualizadorCampo(campo)
     
+    # Enlazar la función on_closing al evento de cierre de ventana
+    visual.root.protocol("WM_DELETE_WINDOW", lambda: on_closing(campo, visual.root))
+
     # Pasamos los objetos necesarios a la función del ciclo
     visual.root.after(100, lambda: ciclo_motor(campo, visual, config))
     visual.iniciar()

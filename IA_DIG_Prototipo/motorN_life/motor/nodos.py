@@ -17,7 +17,7 @@ def crear_nodo(campo):
     contador_nodos += 1
     return nodo
 
-def actualizar_nodo(nodo, campo, config):
+def actualizar_nodo(nodo, campo, config, ciclo):
     if nodo["estado"] != "vivo":
         return
 
@@ -36,4 +36,4 @@ def actualizar_nodo(nodo, campo, config):
 
     if nodo["rho"] > config["theta_colapso"] and abs(nodo["kappa"]) < config["delta_colapso"]:
         nodo["estado"] = "colapsado"
-        campo.registrar_colapso()
+        campo.registrar_colapso(nodo, ciclo)
