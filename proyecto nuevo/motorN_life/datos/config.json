@@ -1,0 +1,10 @@
+{
+  "theta_birth": 1.2,
+  "theta_death": 0.5,
+  "delta_min": -1.0,
+  "delta_max": 1.0,
+  "delta_colapso": 0.2,
+  "theta_colapso": 2.8,
+  "entropia_base": 0.1,
+  "ciclo_delay_ms": 300
+}

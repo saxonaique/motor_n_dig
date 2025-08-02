@@ -1,0 +1,10 @@
+{
+    "ancho": 100,
+    "alto": 100,
+    "ciclo_delay_ms": 200,
+    "theta_death": 0.1,
+    "delta_max": 1.5,
+    "theta_colapso": 2.0,
+    "delta_colapso": 0.2,
+    "theta_birth": 1.2
+}
